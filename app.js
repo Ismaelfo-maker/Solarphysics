@@ -327,12 +327,20 @@
     const cz = S.camera.dist * se;
     const fx = -cx, fy = -cy, fz = -cz;
     const fn = Math.hypot(fx, fy, fz) || 1;
-    const wx = fx/fn, wy = fy/fn, wz = fz/fn;
-    let rx = wy*1 - wz*0, ry = wz*0 - wx*1, rz = wx*0 - wy*0;
+    const wx = fx / fn, wy = fy / fn, wz = fz / fn;
+
+    // Right vector: cross(worldUp, forward) -> evita degeneración en la cámara.
+    const up = [0, 0, 1];
+    let rx = up[1] * wz - up[2] * wy;
+    let ry = up[2] * wx - up[0] * wz;
+    let rz = up[0] * wy - up[1] * wx;
     const rn = Math.hypot(rx, ry, rz) || 1;
     rx /= rn; ry /= rn; rz /= rn;
-    const ux = ry*wz - rz*wy, uy = rz*wx - rx*wz, uz = rx*wy - ry*wx;
-    const focal = (R.H/2) / Math.tan(50*Math.PI/180/2);
+
+    const ux = ry * wz - rz * wy;
+    const uy = rz * wx - rx * wz;
+    const uz = rx * wy - ry * wx;
+    const focal = (R.H / 2) / Math.tan(50 * Math.PI / 180 / 2);
     return { cx, cy, cz, rx, ry, rz, ux, uy, uz, wx, wy, wz, focal, target: S.camera.target };
   }
 
@@ -389,7 +397,7 @@
       expAngle: document.getElementById('expAngle'),
       expAngleVal: document.getElementById('expAngleVal'),
       btnExpLaunch: document.getElementById('btnExpLaunch'),
-      expTable: document.getElementById('expTable').querySelector('tbody'),
+      expTable: document.getElementById('expTable'),
       expPrediction: document.getElementById('expPrediction'),
       // Lab
       labSunMass: document.getElementById('labSunMass'),
@@ -515,7 +523,7 @@
          <h3>${body.name}</h3>
          <button class="close-btn" id="closeInfo">✕</button>
        </div>
-       ${lines.map(([k,vv]) => vv === '' ? `<div class="info-row sub"><span>${vv}</span><b>${''}</b></div>`
+       ${lines.map(([k,vv]) => vv === '' ? `<div class="info-row sub"><span>${k}</span><b>${''}</b></div>`
          : `<div class="info-row"><span>${k}</span><b>${vv}</b></div>`).join('')}
        <div class="info-actions">
          <button class="mini-btn" data-follow="${body.id}">🎯 Seguir</button>
@@ -827,7 +835,7 @@
     ui.selDistMode.onchange = () => { S.distanceMode = ui.selDistMode.value; };
     ui.selSizeMode.onchange = () => {
       S.sizeMode = ui.selSizeMode.value;
-      S.sizeMul = S.sizeMode === 'visual' ? 1 : 1;
+      S.sizeMul = S.sizeMode === 'visual' ? 1 : 2;
     };
 
     // Fecha
