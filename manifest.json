@@ -1,0 +1,20 @@
+{
+  "name": "Solar Physics Simulator",
+  "short_name": "SolarPhys",
+  "description": "Simulador educativo de física orbital del Sistema Solar",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#02020a",
+  "theme_color": "#050510",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
