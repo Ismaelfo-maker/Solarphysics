@@ -1,5 +1,5 @@
 /* Solar Physics Simulator — Service Worker (offline-first) */
-const CACHE = 'solarphys-v1';
+const CACHE = 'solarphys-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -14,7 +14,8 @@ const ASSETS = [
   './render.js',
   './missions.js',
   './storage.js',
-  './app.js'
+  './app.js',
+  './enhancements.js'
 ];
 
 self.addEventListener('install', (e) => {
