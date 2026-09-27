@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#050510">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SolarPhys">
+<title>Solar Physics Simulator</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<canvas id="scene"></canvas>
+
+<!-- HUD superior -->
+<div id="topBar">
+  <div id="topLeft">
+    <div id="topDate">—</div>
+    <div id="topTime">—</div>
+    <div id="energyWrap" title="Error de conservación de energía">
+      <div id="energyBar"></div>
+    </div>
+  </div>
+  <div id="topRight">
+    <button id="btnPlay" class="icon-btn" title="Pausa/Continuar">▶</button>
+    <button id="btnReset" class="icon-btn" title="Reiniciar">⟳</button>
+  </div>
+</div>
+
+<!-- Panel de información flotante -->
+<div id="infoPanel"></div>
+
+<!-- Telemetría de la nave -->
+<div id="telemetry"></div>
+
+<!-- Panel inferior -->
+<div id="bottomSheet">
+  <div id="timeBar">
+    <select id="selTimeScale" class="sel">
+      <option value="1">×1</option>
+      <option value="10">×10</option>
+      <option value="100">×100</option>
+      <option value="1000">×1 000</option>
+      <option value="10000">×10 000</option>
+      <option value="100000">×100 000</option>
+      <option value="1000000" selected>×1 000 000</option>
+    </select>
+    <input type="date" id="dateInput" class="sel">
+    <button id="btnSetDate" class="mini-btn">Ir</button>
+    <select id="selDistMode" class="sel">
+      <option value="real">Escala real</option>
+      <option value="compressed" selected>Escala visual</option>
+    </select>
+    <select id="selSizeMode" class="sel">
+      <option value="real">Tamaño real</option>
+      <option value="visual" selected>Tamaño exagerado</option>
+    </select>
+  </div>
+
+  <nav id="tabs">
+    <button class="tab-btn active" data-tab="solar">🪐 Sistema</button>
+    <button class="tab-btn" data-tab="launch">🚀 Lanzar</button>
+    <button class="tab-btn" data-tab="exp">🧪 Experimento</button>
+    <button class="tab-btn" data-tab="lab">⚗️ Laboratorio</button>
+    <button class="tab-btn" data-tab="hoh">🛰️ Hohmann</button>
+    <button class="tab-btn" data-tab="edu">📚 Aprender</button>
+    <button class="tab-btn" data-tab="missions">🏆 Misiones</button>
+  </nav>
+
+  <div id="panels">
+
+    <section class="tab-panel active" data-panel="solar">
+      <h3>Sistema Solar real</h3>
+      <p class="hint">Toca un planeta para ver su ficha. Arrastra para rotar la cámara, pellizca para hacer zoom. Pulsa un planeta para seguirlo.</p>
+      <div class="hint">La representación visual exagera los tamaños y comprime las distancias para hacer visibles los planetas. Puedes desactivarlo en la barra superior.</div>
+    </section>
+
+    <section class="tab-panel" data-panel="launch">
+      <h3>🚀 Lanzamiento desde la Tierra</h3>
+      <label>Velocidad respecto a la Tierra <output id="lnchSpeedVal">8.0 km/s</output></label>
+      <input type="range" id="lnchSpeed" min="0" max="100" step="0.1" value="8">
+      <label>Ángulo de salida (0° = prograde) <output id="lnchAngleVal">0°</output></label>
+      <input type="range" id="lnchAngle" min="0" max="360" step="1" value="0">
+      <label>Altitud de partida <output id="lnchAltVal">200 km</output></label>
+      <input type="range" id="lnchAlt" min="100" max="40000" step="100" value="200">
+      <label>Masa de la nave <output id="lnchMassVal">1000 kg</output></label>
+      <input type="range" id="lnchMass" min="10" max="100000" step="10" value="1000">
+      <button id="btnLaunch" class="primary-btn">🚀 LANZAR</button>
+      <div id="launchInfo" class="info-box"></div>
+      <p class="hint">La nave parte con la velocidad orbital de la Tierra + el vector indicado. La trayectoria se calcula con el motor de física N-cuerpos.</p>
+    </section>
+
+    <section class="tab-panel" data-panel="exp">
+      <h3>🧪 Experimento velocidad / ángulo</h3>
+      <label>VELOCIDAD <output id="expSpeedVal">8.0 km/s</output></label>
+      <input type="range" id="expSpeed" min="0" max="60" step="0.1" value="8">
+      <label>ÁNGULO <output id="expAngleVal">0°</output></label>
+      <input type="range" id="expAngle" min="0" max="360" step="1" value="0">
+      <button id="btnExpLaunch" class="primary-btn">🚀 LANZAR</button>
+      <div id="expPrediction" class="info-box"></div>
+      <table class="data-table">
+        <thead><tr><th>Velocidad</th><th>Ángulo</th><th>Resultado</th></tr></thead>
+        <tbody id="expTable"><tr><td colspan="3" style="opacity:.5">Sin experimentos todavía</td></tr></tbody>
+      </table>
+    </section>
+
+    <section class="tab-panel" data-panel="lab">
+      <h3>⚗️ Laboratorio</h3>
+      <label>Masa del Sol <output id="labSunMassVal">1.00 M☉</output></label>
+      <input type="range" id="labSunMass" min="0.1" max="5" step="0.01" value="1">
+      <hr>
+      <h4>Crear planeta experimental</h4>
+      <label>Masa <output id="labNewMassVal">1.0 M⊕</output></label>
+      <input type="range" id="labNewMass" min="0.1" max="50" step="0.1" value="1">
+      <label>Distancia al Sol <output id="labNewDistVal">1.5 UA</output></label>
+      <input type="range" id="labNewDist" min="0.2" max="40" step="0.1" value="1.5">
+      <label>Velocidad inicial (tangencial) <output id="labNewVelVal">24.6 km/s</output></label>
+      <input type="range" id="labNewVel" min="0" max="60" step="0.1" value="24.6">
+      <div class="row">
+        <button id="btnLabAdd" class="primary-btn">➕ Crear</button>
+        <button id="btnLabReset" class="mini-btn">↺ Reiniciar lab</button>
+      </div>
+      <div id="labList" class="lab-list"></div>
+    </section>
+
+    <section class="tab-panel" data-panel="hoh">
+      <h3>🛰️ Transferencia de Hohmann</h3>
+      <p class="hint">Maniobra óptima entre dos órbitas circulares coplanares.</p>
+      <button id="btnHohmann" class="primary-btn">Calcular Tierra → Marte</button>
+      <div id="hohmannOut" class="info-box"></div>
+    </section>
+
+    <section class="tab-panel" data-panel="edu">
+      <h3>📚 Descubrir las leyes</h3>
+
+      <div class="edu-card">
+        <h4>Ley de gravitación</h4>
+        <button id="btnEduGravity" class="mini-btn">Calcular F a 1, 2, 3, 4 UA</button>
+        <div id="eduGravityOut" class="info-box"></div>
+      </div>
+
+      <div class="edu-card">
+        <h4>Velocidad orbital y Kepler</h4>
+        <button id="btnEduOrbit" class="mini-btn">Comparar v y T a distintas a</button>
+        <div id="eduOrbitOut" class="info-box"></div>
+      </div>
+
+      <div class="edu-card">
+        <h4>Velocidad de escape</h4>
+        <button id="btnEduEscape" class="mini-btn">Mostrar v_esc por cuerpo</button>
+        <div id="eduEscapeOut" class="info-box"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" data-panel="missions">
+      <h3>🏆 Misiones</h3>
+      <div id="missionList" class="mission-list"></div>
+    </section>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="data.js"></script>
+<script src="orbit.js"></script>
+<script src="physics.js"></script>
+<script src="bodies.js"></script>
+<script src="spacecraft.js"></script>
+<script src="render.js"></script>
+<script src="missions.js"></script>
+<script src="storage.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
