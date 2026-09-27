@@ -32,6 +32,16 @@
   </div>
 </div>
 
+<!-- Selector de planetas -->
+<div id="planetSelector">
+  <select id="planetDropdown" title="Selecciona un planeta para centrarte en él">
+    <option value="">Selecciona un planeta...</option>
+  </select>
+</div>
+
+<!-- Botón de grilla de meses -->
+<button id="btnMonthGrid" class="grid-toggle" title="Mostrar/ocultar grilla de meses">📅 Meses</button>
+
 <!-- Panel de información flotante -->
 <div id="infoPanel"></div>
 
@@ -40,6 +50,8 @@
 
 <!-- Panel inferior -->
 <div id="bottomSheet">
+  <div id="bottomSheetHandle">☰ Menús</div>
+  
   <div id="timeBar">
     <select id="selTimeScale" class="sel">
       <option value="1">×1</option>
