@@ -85,6 +85,24 @@ html, body {
 .tele-row span { opacity: .6; }
 .tele-row b { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; color: #ffb3c1; }
 
+/* ---------- Selector de planetas ---------- */
+#planetSelector {
+  position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+  background: rgba(10,12,30,.95); backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.1); border-radius: 10px;
+  padding: 10px; z-index: 10;
+  max-width: 90vw; min-width: 200px;
+  display: none;
+}
+#planetSelector.show { display: block; }
+#planetSelector select {
+  width: 100%; padding: 10px; background: rgba(60,60,100,.8);
+  color: #e8eaf6; border: 1px solid rgba(255,255,255,.2);
+  border-radius: 8px; font-size: 13px; font-family: inherit;
+  cursor: pointer;
+}
+#planetSelector select option { background: #0a0c1e; color: #e8eaf6; }
+
 /* ---------- Bottom sheet ---------- */
 #bottomSheet {
   position: fixed; bottom: 0; left: 0; right: 0;
@@ -93,7 +111,19 @@ html, body {
   border-radius: 18px 18px 0 0; z-index: 7;
   max-height: 62vh; display: flex; flex-direction: column;
   padding-bottom: env(safe-area-inset-bottom);
+  transition: max-height .3s, transform .3s;
 }
+#bottomSheet.collapsed {
+  max-height: 0; border: none; overflow: hidden;
+  transform: translateY(100%);
+}
+#bottomSheetHandle {
+  display: none; cursor: grab; padding: 12px;
+  text-align: center; color: #b0b6d0; font-size: 14px;
+  user-select: none;
+}
+#bottomSheetHandle:active { cursor: grabbing; }
+
 #timeBar {
   display: flex; gap: 6px; padding: 10px 12px 6px;
   overflow-x: auto; scrollbar-width: none;
@@ -236,11 +266,31 @@ input[type=range]::-moz-range-thumb {
 }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+/* ---------- Grilla de meses ---------- */
+.grid-toggle {
+  position: absolute; top: 60px; right: 60px;
+  background: rgba(60,60,100,.9); border: 1px solid rgba(255,255,255,.2);
+  color: #e8eaf6; padding: 10px 14px; border-radius: 8px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  z-index: 8; pointer-events: auto;
+}
+.grid-toggle:active { transform: scale(.97); }
+
 @media (max-width: 500px) {
   #infoPanel { max-width: calc(100vw - 24px); }
   #telemetry { max-width: calc(100vw - 24px); top: auto; bottom: calc(62vh + 8px); }
+  
+  #bottomSheet { max-height: 55vh; }
+  #bottomSheetHandle { display: block; }
+  #bottomSheet.collapsed { max-height: 45px; }
+  #bottomSheet.collapsed #timeBar,
+  #bottomSheet.collapsed #tabs,
+  #bottomSheet.collapsed #panels { display: none; }
+  #bottomSheet.collapsed #bottomSheetHandle::before { content: '▼ Menús'; }
+  #bottomSheet:not(.collapsed) #bottomSheetHandle::before { content: '▲ Cerrar Menús'; }
 }
+
 @media (min-width: 900px) {
   #bottomSheet { max-height: 42vh; }
   #panels { padding: 0 20px 20px; }
-  }
+}
